@@ -8,12 +8,12 @@ module.exports = app => {
     app.get("/articles", articles.findAll);
   
     // Get a single Article with articleId
-    app.get("/articles/:articleId", articles.findOne);
+    app.get("/articles/:id", articles.findOne);
   
     // Update a Article with articleId
-    app.put("/articles/:articleId", articles.update);
+    app.put("/articles/:id", articles.update);
   
     // Delete a Article with articleId
-    app.delete("/articles/:articleId", articles.delete);
+    app.delete("/articles/:id", articles.delete);
   
   };

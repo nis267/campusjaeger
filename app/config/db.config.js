@@ -4,4 +4,7 @@ module.exports = {
     PASSWORD: "smarthome",
     DB: "campusjaeger",
     dialect: "mysql",
+    define: {
+        timestamps: false
+      },
   };

@@ -1,100 +1,117 @@
-const Article = require("../models/article.model.js");
+// const Article = require("../models/article.model.js");
+const db = require("../models");
+const Article = db.articles;
+const Op = db.sequelize.Op;
 
 // Create and Save a new Article
 exports.create = (req, res) => {
-      // Validate request
+  // Validate request
   if (!req.body) {
     res.status(400).send({
       message: "Content can not be empty!"
     });
+    return;
   }
 
   // Create a Article
-  const article = new Article({
+  const article = {
     name: req.body.name,
     author: req.body.author,
-    text: req.body.text,
-  });
+    text: req.body.text
+  };
 
   // Save Article in the database
-  Article.create(article, (err, data) => {
-    if (err)
+  Article.create(article)
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
       res.status(500).send({
         message:
           err.message || "Some error occurred while creating the Article."
       });
-    else res.send(data);
-  });
+    });
 };
 
 // Retrieve all Articles from the database.
 exports.findAll = (req, res) => {
-    Article.findAll((err, data) => {
-        if (err)
-          res.status(500).send({
-            message:
-              err.message || "Some error occurred while retrieving Articles."
-          });
-        else res.send(data);
+  const title = req.query.title;
+  var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
+
+  Article.findAll({ where: { deleted: 0 } })
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving articles."
       });
+    });
 };
+
 
 // Find a single Article with a articleId
 exports.findOne = (req, res) => {
-    Article.findById(req.params.articleId, (err, data) => {
-        if (err) {
-          if (err.kind === "not_found") {
-            res.status(404).send({
-              message: `Not found Article with id ${req.params.articleId}.`
-            });
-          } else {
-            res.status(500).send({
-              message: "Error retrieving Article with id " + req.params.articleId
-            });
-          }
-        } else res.send(data);
+  const id = req.params.id;
+
+  Article.findByPk({id, deleted: 0})
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Error retrieving Article with id=" + id
       });
+    });
 };
 
 // Update a Article identified by the articleId in the request
 exports.update = (req, res) => {
-    // Validate Request
-  if (!req.body) {
-    res.status(400).send({
-      message: "Content can not be empty!"
-    });
-  }
+  const id = req.params.id;
 
-  Article.updateById(req.params.articleId, new Article(req.body),
-    (err, data) => {
-      if (err) {
-        if (err.kind === "not_found") {
-          res.status(404).send({
-            message: `Not found Article with id ${req.params.articleId}.`
-          });
-        } else {
-          res.status(500).send({
-            message: "Error updating Article with id " + req.params.articleId
-          });
-        }
-      } else res.send(data);
-    }
-  );
+  Article.update(req.body, {
+    where: { id: id, deleted: 0 }
+  })
+    .then(num => {
+      if (num == 1) {
+        res.send({
+          message: "Article was updated successfully."
+        });
+      } else {
+        res.send({
+          message: `Cannot update Article with id=${id}. Maybe Article was not found or req.body is empty!`
+        });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Error updating Article with id=" + id
+      });
+    });
 };
 
-// Delete a Article with the specified articleId in the request
 exports.delete = (req, res) => {
-    Article.remove(req.params.articleId, (err, data) => {
-        if (err) {
-          if (err.kind === "not_found") {
-            res.status(404).send({
-              message: `Not found Article with id ${req.params.articleId}.`
-            });
-          } else {
-            res.status(500).send({
-              message: "Could not delete Article with id " + req.params.articleId
-            });
-          }
-        } else res.send({ message: `Article was deleted successfully!` });
+  const id = req.params.id;
+
+  Article.update(
+    {deleted: 1 },
+    {where: { id: id, deleted: 0 }}
+  )
+    .then(num => {
+      if (num == 1) {
+        res.send({
+          message: "Article was deleted successfully!"
+        });
+      } else {
+        res.send({
+          message: `Cannot delete Article with id=${id}. Maybe Article was not found!`
+        });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Could not delete Article with id=" + id
       });
+    });
 };
