@@ -35,8 +35,6 @@ exports.create = (req, res) => {
 
 // Retrieve all Articles from the database.
 exports.findAll = (req, res) => {
-  const title = req.query.title;
-  var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
 
   Article.findAll({attributes: {exclude: ['text']}}, { where: { deleted: 0 } })
     .then(data => {
