@@ -38,7 +38,7 @@ exports.findAll = (req, res) => {
   const title = req.query.title;
   var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
 
-  Article.findAll({ where: { deleted: 0 } })
+  Article.findAll({attributes: {exclude: ['text']}}, { where: { deleted: 0 } })
     .then(data => {
       res.send(data);
     })
@@ -55,7 +55,7 @@ exports.findAll = (req, res) => {
 exports.findOne = (req, res) => {
   const id = req.params.id;
 
-  Article.findByPk({id, deleted: 0})
+  Article.findByPk({attributes: {exclude: ['text']}}, {id, deleted: 0})
     .then(data => {
       res.send(data);
     })

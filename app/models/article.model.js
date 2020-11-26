@@ -7,15 +7,15 @@ module.exports = (sequelize, Sequelize) => {
         autoIncrement: true
         },
         name: {
-          type: Sequelize.STRING
+          type: Sequelize.STRING,
           allowNull: false
         },
         author: {
-          type: Sequelize.STRING
+          type: Sequelize.STRING,
           allowNull: false
         },
         text: {
-          type: Sequelize.STRING
+          type: Sequelize.STRING,
           allowNull: false
         },
         creation_date: {
